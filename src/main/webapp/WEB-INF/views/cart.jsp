@@ -32,7 +32,7 @@
     <!-- Header -->
     <header class="header">
         <div class="header-container">
-            <a href="${pageContext.request.contextPath}/products" class="logo"><i class="fas fa-laptop"></i> Electronics Store</a>
+            <a href="${pageContext.request.contextPath}/products" class="logo"><i class="fas fa-laptop"></i> Manage Electronics</a>
             <nav class="nav-menu">
                 <a href="${pageContext.request.contextPath}/products"><i class="fas fa-home"></i> Trang chủ</a>
                 <a href="${pageContext.request.contextPath}/wishlist"><i class="fas fa-heart"></i> Yêu thích</a>

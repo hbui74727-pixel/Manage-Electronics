@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Context path="/Manage_Book" antiResourceLocking="false" privileged="true">
+<Context path="/Manage_Electronics" antiResourceLocking="false" privileged="true">
     <!-- Disable memory leak detection warnings -->
     <Manager pathname="" />
     

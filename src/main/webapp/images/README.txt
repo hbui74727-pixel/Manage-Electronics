@@ -7,7 +7,7 @@ CẤU TRÚC:
 ---------
 /images/
   - no-image.png          : Ảnh mặc định khi không có ảnh sản phẩm
-  - product-sample-1.jpg     : Ảnh mẫu sản phẩm 1 (màu xanh lá)
+  - product-sample-1.jpg  : Ảnh mẫu sản phẩm 1
   - product-sample-2.jpg     : Ảnh mẫu sản phẩm 2 (màu xanh dương)
   - product-sample-3.jpg     : Ảnh mẫu sản phẩm 3 (màu cam)
 

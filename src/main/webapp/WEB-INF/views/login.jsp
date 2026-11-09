@@ -14,7 +14,7 @@
         <h2><i class="fas fa-sign-in-alt"></i> Đăng nhập</h2>
         
         <c:if test="${not empty error}">
-            <div class="alert alert-error">${error}</div>
+            <div class="alert alert-error"><c:out value="${error}"/></div>
         </c:if>
         
         <c:if test="${not empty success}">

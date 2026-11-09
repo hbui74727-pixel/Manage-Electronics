@@ -43,15 +43,15 @@ Mặc định (file `util/DBConnection.java`): `localhost:1433`, database `Manag
 1. *File → Open Project* → chọn thư mục dự án (có `pom.xml`).
 2. *Tools → Servers → Add Server → Apache Tomcat* → trỏ tới thư mục Tomcat 10.1.
 3. Chuột phải dự án → **Clean and Build**, sau đó **Run**.
-4. Mở: `http://localhost:8080/Manage_Book/`
+4. Mở: `http://localhost:8080/Manage_Electronics/`
 
 ### Cách B – Maven + Tomcat thủ công
 ```bash
-mvn clean package                         # tạo target/Manage_Book.war
-cp target/Manage_Book.war  <TOMCAT>/webapps/
+mvn clean package                         # tạo target/Manage_Electronics.war
+cp target/Manage_Electronics.war  <TOMCAT>/webapps/
 <TOMCAT>/bin/startup.sh                   # Windows: startup.bat
 ```
-Mở: `http://localhost:8080/Manage_Book/`
+Mở: `http://localhost:8080/Manage_Electronics/`
 
 > Lần build đầu cần Internet để Maven tải thư viện (Servlet API, JSTL, mssql-jdbc, Jakarta Mail…).
 
@@ -85,12 +85,12 @@ Bộ test case đầy đủ nằm trong file báo cáo (mục Kiểm thử).
 
 ```
 Manage-Electronics/
-├── pom.xml                      # cấu hình Maven (đóng gói WAR: Manage_Book.war)
+├── pom.xml                      # cấu hình Maven (đóng gói WAR: Manage_Electronics.war)
 ├── Manage_Electronics.sql       # script tạo CSDL + dữ liệu mẫu
 ├── HUONG_DAN.md                 # tài liệu này
 ├── docs/                        # ERD, mô hình CSDL (png/svg)
 └── src/main
-    ├── java/com/mycompany/manage_book
+    ├── java/com/mycompany/manage_electronics
     │   ├── model/               # lớp thực thể (User, Product, Order, ...)
     │   ├── dao/                 # truy cập CSDL bằng JDBC + PreparedStatement
     │   ├── servlet/             # controller xử lý request
@@ -106,11 +106,18 @@ Manage-Electronics/
 
 | Hiện tượng | Nguyên nhân / cách xử lý |
 |---|---|
-| HTTP 404 khi mở trang | Sai đường dẫn: phải là `/Manage_Book/` (tên file WAR). |
+| HTTP 404 khi mở trang | Sai đường dẫn: phải là `/Manage_Electronics/` (tên file WAR). |
 | `ClassNotFoundException: jakarta.servlet...` hoặc trang trắng/500 ngay khi khởi động | Đang dùng Tomcat 9. Cài **Tomcat 10.1**. |
 | `The TCP/IP connection to the host localhost, port 1433 has failed` | SQL Server chưa bật TCP/IP: *SQL Server Configuration Manager → Protocols → TCP/IP = Enabled*, khởi động lại dịch vụ. |
 | `Login failed for user 'sa'` | Sai `DB_PASSWORD`, hoặc chưa bật chế độ đăng nhập SQL Server authentication / tài khoản `sa` bị khóa. |
 | `Cannot open database "Manage_Electronics"` | Chưa chạy file SQL (mục 2). |
 | Tiếng Việt bị lỗi font | Mở file SQL/JSP bằng UTF-8; dự án đã có `EncodingFilter` để ép UTF-8 cho request/response. |
 | Không xóa được sản phẩm/danh mục/người dùng/voucher | Đúng thiết kế: dữ liệu đang được tham chiếu (vd. sản phẩm đã có trong đơn hàng) – hệ thống báo lỗi thân thiện thay vì xóa mất lịch sử. |
-| Ảnh tải lên biến mất sau khi build lại | Ảnh lưu trong thư mục triển khai; khi chạy từ `target/`, hệ thống tự chép thêm vào `src/main/webapp/images`. Khi triển khai WAR độc lập, ảnh nằm trong `webapps/Manage_Book/images`. |
+| Ảnh tải lên biến mất sau khi build lại | Ảnh lưu trong thư mục triển khai; khi chạy từ `target/`, hệ thống tự chép thêm vào `src/main/webapp/images`. Khi triển khai WAR độc lập, ảnh nằm trong `webapps/Manage_Electronics/images`. |
+
+### Lỗi HTTP 503 "Servlet [jsp] is currently unavailable"
+JSP engine của Tomcat không khởi động được, thường do xung đột thư viện hoặc bản deploy cũ còn sót:
+1. Dừng Tomcat, xóa thư mục `webapps/Manage_Book*`, `webapps/Manage_Electronics*` và `work/Catalina/localhost/*` (nếu có).
+2. Chạy **Clean and Build** (hoặc `mvn clean package`) để lấy thư viện mới, rồi deploy lại.
+3. Dùng **Tomcat 10.1.x** và **JDK 17+** (Tomcat 10.1.44 ở trên là phù hợp).
+4. Nếu vẫn lỗi: mở `TOMCAT/logs/catalina.*.log` hoặc `localhost.*.log`, tìm dòng `SEVERE`/`Caused by` đầu tiên để biết nguyên nhân chính xác.
