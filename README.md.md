@@ -12,30 +12,37 @@ Website quản lý & bán thiết bị điện tử viết bằng **Java Servlet
 | SQL Server | 2017 trở lên (Express được) | bật TCP/IP cổng 1433, bật chế độ đăng nhập *SQL Server and Windows Authentication* |
 | SSMS | bất kỳ | để chạy file SQL |
 
-## 2. Tạo cơ sở dữ liệu
+## 2. Cơ sở dữ liệu – tự động tạo
 
-1. Mở **SQL Server Management Studio**, kết nối vào server.
-2. Mở file `Manage_Electronics.sql` ở thư mục gốc dự án → bấm **Execute (F5)** *một lần, chạy toàn bộ*.
-3. Script sẽ **xóa và tạo lại** database `Manage_Electronics`, tạo 10 bảng, ràng buộc, chỉ mục và nạp dữ liệu mẫu (5 danh mục, 10 sản phẩm, 3 người dùng, 2 voucher, 3 đơn hàng).
-4. Kiểm tra: câu `SELECT` cuối script trả về `5 | 10 | 3`.
+**Không cần tự chạy file SQL.** Khi ứng dụng khởi động (hoặc ở lần truy cập CSDL đầu tiên), `DBConnection` sẽ:
+
+1. Dò kết nối SQL Server (xem mục 3).
+2. Nếu đăng nhập được nhưng database `Manage_Electronics` **chưa tồn tại** → tự chạy `Manage_Electronics.sql` (đã được đóng gói vào WAR) để tạo 10 bảng, ràng buộc, chỉ mục và nạp dữ liệu mẫu (5 danh mục, 10 sản phẩm, 3 người dùng, 2 voucher, 3 đơn hàng).
+3. Nếu database **đã có** thì không đụng tới – dữ liệu của bạn luôn được giữ nguyên.
+
+Muốn tự tạo bằng tay (hoặc đặt lại dữ liệu mẫu): mở `Manage_Electronics.sql` trong SSMS → **Execute (F5)** một lần. Lưu ý script này **xóa và tạo lại** database. Có thể tắt tính năng tự tạo bằng `db.autoinit=false` (hoặc biến môi trường `DB_AUTO_INIT=false`).
 
 ## 3. Cấu hình kết nối CSDL
 
-Mặc định (file `util/DBConnection.java`): `localhost:1433`, database `Manage_Electronics`, user `sa`, mật khẩu `123456`.
+**Đa số máy không cần sửa gì.** Mặc định: `localhost:1433`, database `Manage_Electronics`, user `sa`. Ứng dụng tự:
 
-**Cách 1 – không sửa code (khuyên dùng):** đặt biến môi trường trước khi chạy Tomcat
+- thử mật khẩu `123456`, rồi `123` nếu mật khẩu cấu hình bị từ chối;
+- thử thêm instance `localhost\SQLEXPRESS` nếu cổng 1433 không phản hồi;
+- ghi nhớ cấu hình đã kết nối thành công nên không phải dò lại ở các request sau.
 
-| Biến | Ví dụ |
+Nếu mật khẩu `sa` của bạn **khác** `123456` và `123`, chọn một trong các cách (ưu tiên từ trên xuống):
+
+| Cách | Thực hiện |
 |---|---|
-| `DB_URL` | `jdbc:sqlserver://localhost:1433;databaseName=Manage_Electronics;encrypt=false;trustServerCertificate=true` |
-| `DB_USER` | `sa` |
-| `DB_PASSWORD` | mật khẩu SQL Server của bạn |
+| Biến môi trường | `DB_PASSWORD`, và (tùy chọn) `DB_USER`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_INSTANCE`, `DB_URL` |
+| Tham số JVM | `-DDB_PASSWORD=matkhau` (NetBeans: *Servers → Tomcat → Platform → VM Options*) |
+| File cấu hình | Sửa `src/main/resources/db.properties` (cần build lại) **hoặc** đặt file `db.properties` vào `TOMCAT/conf/` (không cần build lại, ghi đè file trong WAR) |
 
-- Windows: tạo file `TOMCAT/bin/setenv.bat` với `set DB_PASSWORD=matkhau_cua_ban`.
-- Linux/macOS: tạo `TOMCAT/bin/setenv.sh` với `export DB_PASSWORD=matkhau_cua_ban`.
-- NetBeans: *Services → Servers → Tomcat → Properties → Platform → VM Options* hoặc đặt biến môi trường hệ điều hành rồi khởi động lại NetBeans.
+Các khóa trong `db.properties`: `db.user`, `db.password`, `db.host`, `db.port`, `db.name`, `db.instance`, `db.fallbackPasswords` (danh sách mật khẩu dự phòng, để trống để tắt), `db.autoinit`, `db.url` (chuỗi JDBC đầy đủ, nếu đặt thì bỏ qua host/port/instance).
 
-**Cách 2:** sửa trực tiếp giá trị mặc định trong `DBConnection.java`.
+Điều kiện còn lại trên SQL Server: dịch vụ đang chạy, bật TCP/IP cổng 1433, chế độ đăng nhập *SQL Server and Windows Authentication* và tài khoản `sa` đang được bật.
+
+> Bảo mật: cơ chế tự thử mật khẩu phổ biến chỉ nhằm tiện cho môi trường học tập/phát triển. Khi triển khai thật hãy dùng tài khoản riêng ít quyền, đặt mật khẩu mạnh qua biến môi trường và đặt `db.fallbackPasswords=` (rỗng).
 
 ## 4. Build và chạy
 
@@ -86,7 +93,7 @@ Bộ test case đầy đủ nằm trong file báo cáo (mục Kiểm thử).
 ```
 Manage-Electronics/
 ├── pom.xml                      # cấu hình Maven (đóng gói WAR: Manage_Electronics.war)
-├── Manage_Electronics.sql       # script tạo CSDL + dữ liệu mẫu
+├── Manage_Electronics.sql       # script tạo CSDL + dữ liệu mẫu (tự chạy khi chưa có database)
 ├── HUONG_DAN.md                 # tài liệu này
 ├── docs/                        # ERD, mô hình CSDL (png/svg)
 └── src/main
@@ -95,7 +102,9 @@ Manage-Electronics/
     │   ├── dao/                 # truy cập CSDL bằng JDBC + PreparedStatement
     │   ├── servlet/             # controller xử lý request
     │   ├── filter/              # EncodingFilter (UTF-8)
+    │   ├── listener/            # DatabaseInitListener (kiểm tra/tạo CSDL khi khởi động)
     │   └── util/                # DBConnection, PasswordUtil, EmailUtil, DaoResult
+    ├── resources/db.properties   # cấu hình kết nối SQL Server
     └── webapp
         ├── WEB-INF/views/*.jsp  # giao diện (view)
         ├── css/style.css
@@ -109,8 +118,8 @@ Manage-Electronics/
 | HTTP 404 khi mở trang | Sai đường dẫn: phải là `/Manage_Electronics/` (tên file WAR). |
 | `ClassNotFoundException: jakarta.servlet...` hoặc trang trắng/500 ngay khi khởi động | Đang dùng Tomcat 9. Cài **Tomcat 10.1**. |
 | `The TCP/IP connection to the host localhost, port 1433 has failed` | SQL Server chưa bật TCP/IP: *SQL Server Configuration Manager → Protocols → TCP/IP = Enabled*, khởi động lại dịch vụ. |
-| `Login failed for user 'sa'` | Sai `DB_PASSWORD`, hoặc chưa bật chế độ đăng nhập SQL Server authentication / tài khoản `sa` bị khóa. |
-| `Cannot open database "Manage_Electronics"` | Chưa chạy file SQL (mục 2). |
+| `Login failed for user 'sa'` | Mật khẩu `sa` khác `123456`/`123` → đặt `DB_PASSWORD` hoặc sửa `db.properties` (mục 3); hoặc chưa bật SQL Server authentication / tài khoản `sa` bị khóa. |
+| `Cannot open database "Manage_Electronics"` hoặc báo không tự tạo được database | Ứng dụng thường tự tạo; nếu bị tắt (`db.autoinit=false`) hoặc tài khoản không đủ quyền `CREATE DATABASE` thì chạy `Manage_Electronics.sql` bằng SSMS (mục 2). |
 | Tiếng Việt bị lỗi font | Mở file SQL/JSP bằng UTF-8; dự án đã có `EncodingFilter` để ép UTF-8 cho request/response. |
 | Không xóa được sản phẩm/danh mục/người dùng/voucher | Đúng thiết kế: dữ liệu đang được tham chiếu (vd. sản phẩm đã có trong đơn hàng) – hệ thống báo lỗi thân thiện thay vì xóa mất lịch sử. |
 | Ảnh tải lên biến mất sau khi build lại | Ảnh lưu trong thư mục triển khai; khi chạy từ `target/`, hệ thống tự chép thêm vào `src/main/webapp/images`. Khi triển khai WAR độc lập, ảnh nằm trong `webapps/Manage_Electronics/images`. |

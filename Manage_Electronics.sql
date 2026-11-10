@@ -5,8 +5,6 @@
    Mat khau trong du lieu mau duoc luu dang bam PBKDF2 (xem util/PasswordUtil.java);
    mat khau dang nhap: user1/password1, user2/password2, admin1/123456.
    ============================================================ */
-ALTER LOGIN sa ENABLE;
-ALTER LOGIN sa WITH PASSWORD = '123456', CHECK_POLICY = OFF;
 USE master;
 GO
 IF DB_ID('Manage_Electronics') IS NOT NULL
@@ -135,7 +133,7 @@ GO
 INSERT INTO Users (username, password, full_name, email, role) VALUES
 ('user1',  'pbkdf2$65536$wFaLCh/7h20biVCh9m++vA==$S89zwtoDwNdQkEBerNmDX58zXomZp8/qobb8BOLnSLA=', N'Nguyễn Thị Mai', 'mai@example.com',   0),
 ('user2',  'pbkdf2$65536$atNwxz7fcPCGd9VDOBJuqQ==$8IaXxSxnoKiriZFGUbDoQZ3Dnc4Zi2Ze/2Gh6otvT7A=', N'Trần Thị Lan',   'lan@example.com',   0),
-('admin1', 'pbkdf2$65536$kqKLApEmrdhmfkVfynK2OA==$pZbRA0Fq1uhpQxO5tVvgnNaaCQk2FygYoyiL1mEJ0lc=',    N'Lê Minh Cường',  'cuong@example.com', 1);
+('admin1', 'pbkdf2$65536$kqKLApEmrdhmfkVfynK2OA==$pZbRA0Fq1uhpQxO5tVvgnNaaCQk2FygYoyiL1mEJ0lc=',    N'Nguyễn Cao Đức Anh', '10diemnhe@gmail.com', 1);
 
 INSERT INTO Categories (name, description) VALUES
 (N'Điện thoại',          N'Điện thoại thông minh các hãng'),

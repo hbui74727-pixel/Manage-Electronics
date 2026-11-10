@@ -93,6 +93,18 @@
     
      <build>
         <finalName>Manage_Electronics</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- Đóng gói Manage_Electronics.sql vào classpath để ứng dụng tự tạo database khi chưa có -->
+            <resource>
+                <directory>${basedir}</directory>
+                <includes>
+                    <include>Manage_Electronics.sql</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
