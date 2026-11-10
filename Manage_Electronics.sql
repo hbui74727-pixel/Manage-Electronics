@@ -5,6 +5,8 @@
    Mat khau trong du lieu mau duoc luu dang bam PBKDF2 (xem util/PasswordUtil.java);
    mat khau dang nhap: user1/password1, user2/password2, admin1/123456.
    ============================================================ */
+ALTER LOGIN sa ENABLE;
+ALTER LOGIN sa WITH PASSWORD = '123456', CHECK_POLICY = OFF;
 USE master;
 GO
 IF DB_ID('Manage_Electronics') IS NOT NULL
